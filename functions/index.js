@@ -1,22 +1,3 @@
-/**
- * Import function triggers from their respective submodules:
- *
- * const {onCall} = require("firebase-functions/v2/https");
- * const {onDocumentWritten} = require("firebase-functions/v2/firestore");
- *
- * See a full list of supported triggers at https://firebase.google.com/docs/functions
- */
-
-const {onRequest} = require("firebase-functions/v2/https");
-const logger = require("firebase-functions/logger");
-
-// Create and deploy your first functions
-// https://firebase.google.com/docs/functions/get-started
-
-// exports.helloWorld = onRequest((request, response) => {
-//   logger.info("Hello logs!", {structuredData: true});
-//   response.send("Hello from Firebase!");
-// });
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 const { Storage } = require('@google-cloud/storage');
@@ -34,38 +15,50 @@ exports.processVideo = functions.firestore
     const videoData = snap.data();
     const videoId = context.params.videoId;
 
+    // Ensure videoData.path is defined before attempting to split
+    const fileType = (videoData.path && videoData.path.split('.').pop().toLowerCase()) || '';
+
+    // Set the fileType in the Firestore document
+    await snap.ref.set({ fileType }, { merge: true });
+    console.log('Video Data:', videoData);
+
     const bucket = storage.bucket('cvc_bucket-2');
-    const tempLocalFile = path.join(os.tmpdir(), 'temp_video.mp4');
-    const tempDistortedFile = path.join(os.tmpdir(), 'distorted_audio.wav');
+    const tempLocalFile = path.join(os.tmpdir(), `temp_video.${fileType}`);
+    const tempAudioFile = path.join(os.tmpdir(), `output_audio.wav`);
 
-    // Download the video file
-    await bucket.file(videoData.path).download({ destination: tempLocalFile });
+    // Ensure videoData.path is defined before attempting to download
+    if (videoData.videoPath) {
+      // Download the video file
+      await bucket.file(videoData.videoPath).download({ destination: tempLocalFile });
 
-    // Perform audio distortion using FFmpeg
-    await new Promise((resolve, reject) => {
-      ffmpeg(tempLocalFile)
-        .audioCodec('pcm_s16le')
-        .audioFilters('volume=1.5') // Adjust distortion factor as needed
-        .save(tempDistortedFile)
-        .on('end', resolve)
-        .on('error', reject);
+      // Perform audio conversion using FFmpeg
+      await new Promise((resolve, reject) => {
+        ffmpeg(tempLocalFile)
+          .toFormat('wav')
+          .save(tempAudioFile)
+          .on('end', resolve)
+          .on('error', reject);
+      });
+    } else {
+      console.log("videoData.videoPath does not exist", videoData);
+      return null; // Abort processing if videoData.path is not available
+    }
+
+    // Upload the converted audio file
+    const folderName = 'poisoned_audio';
+    const audioDestinationFileName = `${folderName}/${videoId}_output.wav`;
+    await bucket.upload(tempAudioFile, {
+      destination: audioDestinationFileName,
     });
 
-    // Upload the distorted audio to Firestore
-    const distortedAudioRef = admin.firestore().collection('distortedAudios').doc(videoId);
-    const distortedAudioBucket = storage.bucket('cvc_bucket-2');
-    await distortedAudioBucket.upload(tempDistortedFile, {
-      destination: `distorted_audios/${videoId}.wav`,
-      metadata: { contentType: 'audio/wav' },
+    // Update Firestore document with the new audio path
+    await admin.firestore().collection('videos').doc(videoId).update({
+      audioPath: `videos/${audioDestinationFileName}`,
     });
 
     // Clean up temporary files
     fs.unlinkSync(tempLocalFile);
-    fs.unlinkSync(tempDistortedFile);
+    fs.unlinkSync(tempAudioFile);
 
-    return distortedAudioRef.set({
-      path: `distorted_audios/${videoId}.wav`,
-      // add any other necessary fields
-    });
+    return null; // Success
   });
-
