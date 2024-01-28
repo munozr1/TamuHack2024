@@ -2,19 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
-}
-
+/* :root {
+  --foreground-rgb: 0, 0, 0; 
+  --background-start-rgb: 214, 219, 220; 
+  --background-end-rgb: 255, 255, 255; 
+} */
+/* 
 @media (prefers-color-scheme: dark) {
   :root {
     --foreground-rgb: 255, 255, 255;
     --background-start-rgb: 0, 0, 0;
     --background-end-rgb: 0, 0, 0;
   }
-}
+} */
 
 body {
   color: rgb(var(--foreground-rgb));
@@ -30,4 +30,21 @@ body {
   .text-balance {
     text-wrap: balance;
   }
+  /* .custom-css {
+    flex: 0 1 auto;
+    transition: 0.2s all  ease-in-out;
+  } */
+  /* .custom-css:hover {
+    flex: 1 0 auto;
+  } */
+  .animated-width{
+  /* Add your common styles here */
+  transition: width 0.5s ease; /* Adjust the transition duration and timing function */
 }
+
+.expanded {
+  width: 200%; /* Adjust the expanded width as needed */
+}
+}
+
+
