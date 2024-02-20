@@ -34,28 +34,26 @@ exports.processVideo = functions.firestore
 
         // Perform audio conversion using FFmpeg
         await new Promise((resolve, reject) => {
-          ffmpeg(tempLocalFile)
+          const command = ffmpeg(tempLocalFile)
             .toFormat('wav')
-            .on('end', () => {
-              // Apply distortion to the audio file
-              ffmpeg()
-                .input(tempLocalFile)
-                .audioFilter('compand=attacks=0:points=-80/-900|-45/-15|-15/21|0/0')
-                .on('end', () => {
-                  console.log('ffmpeg distort success');
-                  resolve();
-                })
-                .on('error', (err) => {
-                  console.error('Error adding distortion:', err);
-                  reject(err);
-                })
-                .save(tempAudioFile);
-            })
+            .save(tempAudioFile)
+            .on('end', resolve)
             .on('error', (err) => {
               console.error('Error during conversion:', err);
               reject(err);
-            })
-            .save(tempAudioFile);
+            });
+	await new Promise((resolve, reject) => {
+         ffmpeg(tempLocalFile)
+          .audioFilter('compand=attacks=0:points=-80/-900|-45/-15|-15/21|0/0')
+          .on('end', resolve)
+          .on('error', (err) => {
+            console.error('Error adding distortion:', err);
+            reject(err);
+          })
+          .save(tempAudioFile);
+      });
+
+	console.log('ffmpeg distort success')
         });
       } else {
         console.log("videoData.videoPath does not exist", videoData);
@@ -85,4 +83,3 @@ exports.processVideo = functions.firestore
       return null;
     }
   });
-

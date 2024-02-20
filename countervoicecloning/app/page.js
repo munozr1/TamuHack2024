@@ -2,40 +2,36 @@
 import Image from 'next/image';
 import { LifebuoyIcon, NewspaperIcon, PhoneIcon } from '@heroicons/react/20/solid'
 import Script from 'next/script';
+import { ExclamationCircleIcon, ShieldCheckIcon, LockClosedIcon } from '@heroicons/react/20/solid';
 import React from 'react';
 
-
+  const vPhishingReasons = [
+  {
+    name: 'Voice Manipulation',
+    description:
+      'Attackers can manipulate their voice to imitate someone you know or a trusted authority, making their messages more convincing.',
+    href: '#',
+    icon: ExclamationCircleIcon,
+  },
+  {
+    name: 'Caller ID Spoofing',
+    description:
+      'Vishing attackers often use techniques to spoof caller IDs, making it appear as if the call is coming from a legitimate source.',
+    href: '#',
+    icon: LockClosedIcon,
+  },
+  {
+    name: 'Social Engineering Tactics',
+    description:
+      'Vishing involves social engineering tactics where attackers exploit human psychology to extract sensitive information over the phone.',
+    href: '#',
+    icon: ShieldCheckIcon,
+  },
+];
+  
 
 export default function Home() {
   const [expanded, setExpanded] = React.useState('');
-
-  // const handleFileChange = async (event) => {
-  //   console.log('handleFileChange');
-  //   const selectedFile = event.target.files[0];
-
-  //   if (selectedFile) {
-  //     const localVideoPath = URL.createObjectURL(selectedFile);
-  //     const destinationFileName = selectedFile.name;
-
-  //     try {
-  //       const response = await fetch('http://localhost:8080/upload', {
-  //         method: 'POST',
-  //         headers: {
-  //           'Content-Type': 'application/json',
-  //         },
-  //         body: JSON.stringify({ localVideoPath, destinationFileName }),
-  //       });
-
-  //       if (response.ok) {
-  //         console.log('File uploaded successfully');
-  //       } else {
-  //         console.error('Error uploading file');
-  //       }
-  //     } catch (error) {
-  //       console.error(error);
-  //     }
-  //   }
-  // };
   const handleFileChange = async (event) => {
     console.log('handleFileChange');
     const selectedFile = event.target.files[0];
@@ -88,10 +84,45 @@ export default function Home() {
   return (
     <div>
         <Script src='https://cdn.tailwindcss.com'></Script>
-   
-    <div className='flex min-h-screen min-w-screen'>
-   
+      <div>
+        <div className="bg-gray-900 py-24 sm:py-32">
+          <div className="mx-auto max-w-7xl px-6 lg:px-8">
+            <div className="mx-auto max-w-2xl lg:text-center">
+              <h2 className="text-base font-semibold leading-7 text-indigo-400">Stay Informed</h2>
+              <p className="mt-2 text-3xl font-bold tracking-tight text-white sm:text-4xl">
+                Reasons to be Aware of vPhishing Attacks
+              </p>
+              <p className="mt-6 text-lg leading-8 text-gray-300">
+                Be vigilant against vPhishing attacks by understanding the tactics used by attackers and staying informed about potential threats.
+              </p>
+            </div>
+            <div className="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-none">
+              <dl className="grid max-w-xl grid-cols-1 gap-x-8 gap-y-16 lg:max-w-none lg:grid-cols-3">
+                {vPhishingReasons.map((reason) => (
+                  <div key={reason.name} className="flex flex-col">
+                    <dt className="flex items-center gap-x-3 text-base font-semibold leading-7 text-white">
+                      <reason.icon className="h-5 w-5 flex-none text-indigo-400" aria-hidden="true" />
+                      {reason.name}
+                    </dt>
+                    <dd className="mt-4 flex flex-auto flex-col text-base leading-7 text-gray-300">
+                      <p className="flex-auto">{reason.description}</p>
+                      <p className="mt-6">
+                        <a href={reason.href} className="text-sm font-semibold leading-6 text-indigo-400">
+                          Learn more <span aria-hidden="true">→</span>
+                        </a>
+                      </p>
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
+          </div>
+        </div>
+      </div> 
+    <div className='flex flex-row min-h-screen min-w-screen'>
+        
         <div className={` mr-2 animated-width ${expanded == 'NS' ? 'expanded' : 'w-[100vh]'}  shadow-2xl   bg-[#2A2A2A] mt-16 ml-0 h-[80vh] rounded-r-3xl flex flex-row items-center justify-evenly mx-auto`}>
+        
           <div class={`flex items-center justify-center w-full ${expanded === 'NS' ? '' : 'hidden'}`}>
             <label for="dropzone-file" class="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer  dark:hover:bg-bray-800 drk:bg-gray-700  dark:border-gray-600 dark:hover:borer-gray-500 dark:hover:bg-[#3a3939b3]">
               <div class="flex flex-col items-center justify-center pt-5 pb-6">
